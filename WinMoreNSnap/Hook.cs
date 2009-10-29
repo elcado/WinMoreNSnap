@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Drawing;
+using System.Windows.Forms;
+
 using ManagedWinapi.Hooks;
 using ManagedWinapi.Windows;
 
@@ -9,9 +10,9 @@ namespace WinMoreNSnap
 {
     class Hook
     {
-        #region MouseMessage and KeyboardMessage enums
+        #region MouseState, KeyboardMessage, VirtualKeys and WindowsQuarter enums
 
-        private enum MouseMessage: int
+        private enum MouseState
         {
             WM_MOUSEMOVE = 0x200,
             WM_LBUTTONDOWN = 0x201,
@@ -37,6 +38,8 @@ namespace WinMoreNSnap
 
         private enum VirtualKeys: ushort
         {
+// ReSharper disable InconsistentNaming
+// ReSharper disable UnusedMember.Local
             /// <summary></summary>
             LeftButton = 0x01,
             /// <summary></summary>
@@ -427,105 +430,391 @@ namespace WinMoreNSnap
             PA1 = 0xFD,
             /// <summary></summary>
             OEMClear = 0xFE
+// ReSharper restore InconsistentNaming
+// ReSharper restore UnusedMember.Local
+        }
+
+        private enum WindowsQuarter { DIR_NONE, DIR_NE, DIR_NW, DIR_SE, DIR_SW };
+
+        #endregion
+
+        #region Keyboard hook
+
+        private static LowLevelKeyboardMessage _lastKeyboardMessage;
+
+        private static bool _isAltDown;
+        private static bool _isShiftDown;
+        private static bool _isControlDown;
+
+        public static void KeyboardHook(LowLevelMessage evt, ref bool handled)
+        {
+            LowLevelKeyboardMessage kevt = evt as LowLevelKeyboardMessage;
+
+            // Prevent further code execution when the key stroke hasn't changed
+            if (_lastKeyboardMessage != null)
+            {
+                bool notchanged = (kevt.Message == _lastKeyboardMessage.Message)
+                                  && (kevt.VirtualKeyCode == _lastKeyboardMessage.VirtualKeyCode)
+                                  && (kevt.KeyboardEventFlags == _lastKeyboardMessage.KeyboardEventFlags)
+                                  && (kevt.ExtraInfo == _lastKeyboardMessage.ExtraInfo);
+                    
+                if (notchanged)
+                    return;
+            }
+            _lastKeyboardMessage = kevt;
+
+            // Get keyboard state
+            switch ((KeyboardMessage)kevt.Message)
+            {
+                case KeyboardMessage.WM_KEYDOWN:
+                case KeyboardMessage.WM_SYSKEYDOWN:
+                    if (((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.LeftMenu) || ((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.RightMenu))
+                        _isAltDown = true;
+                    if (((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.LeftShift) || ((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.RightShift))
+                        _isShiftDown = true;
+                    if (((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.LeftControl) || ((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.RightControl))
+                        _isControlDown = true;
+                    break;
+                case KeyboardMessage.WM_KEYUP:
+                case KeyboardMessage.WM_SYSKEYUP:
+                    if (((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.LeftMenu) || ((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.RightMenu))
+                        _isAltDown = false;
+                    if (((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.LeftShift) || ((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.RightShift))
+                        _isShiftDown = false;
+                    if (((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.LeftControl) || ((VirtualKeys)kevt.VirtualKeyCode == VirtualKeys.RightControl))
+                        _isControlDown = false;
+                    break;
+            }
         }
 
         #endregion
+
+        #region Mouse hook
+
+        private static SystemWindow _currentWindow;
+        private static bool _isMoving, _isResizing;
+        private static Point _previousPoint;
+        private static WindowsQuarter _clickedQuarter;
+        private static Dictionary<SystemWindow, RECT> _snapedWindows = new Dictionary<SystemWindow, RECT>();
 
         public static void MouseHook(LowLevelMessage evt, ref bool handled)
         {
             LowLevelMouseMessage mevt = evt as LowLevelMouseMessage;
             if (mevt != null)
             {
-                String message = "";
+                MouseButtons moveMouseState = TrayApp.OptionsManager.MoveOptions.mouseButton;
+                MouseButtons resizeMouseState = TrayApp.OptionsManager.ResizeOptions.mouseButton;
 
-                switch ((MouseMessage)mevt.Message)
+                switch ((MouseState)mevt.Message)
                 {
-                    case MouseMessage.WM_MOUSEMOVE:
-                        message = "WM_MOUSEMOVE";
-                        break;
-                    
-                    case MouseMessage.WM_LBUTTONDOWN:
-                        message = "WM_LBUTTONDOWN";
-                        break;
-                    case MouseMessage.WM_RBUTTONDOWN:
-                        message = "WM_RBUTTONDOWN";
-                        break;
-                    case MouseMessage.WM_MBUTTONDOWN:
-                        message = "WM_MBUTTONDOWN";
+                    case MouseState.WM_LBUTTONDOWN:
+                    case MouseState.WM_RBUTTONDOWN:
+                    case MouseState.WM_MBUTTONDOWN:
+                        if (TestMoveKeyModifier() && TestMoveMouseState(mevt))
+                        {
+                            // Now we are moving...
+                            _isMoving = true;
+
+                            //... this window...
+                            _currentWindow = GetTopLevel(SystemWindow.FromPoint(mevt.Point.X, mevt.Point.Y));
+
+                            //... from here to somewhere.
+                            _previousPoint = mevt.Point;
+
+                            // Prevent event to be forwarded
+                            handled = true;
+                        }
+                        else if (TestResizeKeyModifier() && TestResizeMouseState(mevt))
+                        {
+                            // Now we are resizing...
+                            _isResizing = true;
+
+                            //... this window...
+                            _currentWindow = GetTopLevel(SystemWindow.FromPoint(mevt.Point.X, mevt.Point.Y));
+
+                            //... from this point/quarter.
+                            _previousPoint = mevt.Point;
+                            _clickedQuarter = GetQuarterFromPoint(_currentWindow, mevt.Point);
+
+                            // Prevent event to be forwarded
+                            handled = true;
+                        }
                         break;
 
-                    case MouseMessage.WM_LBUTTONUP:
-                        message = "WM_LBUTTONUP";
-                        break;
-                    case MouseMessage.WM_RBUTTONUP:
-                        message = "WM_RBUTTONUP";
-                        break;
-                    case MouseMessage.WM_MBUTTONUP:
-                        message = "WM_MBUTTONUP";
+                    case MouseState.WM_MOUSEMOVE:
+                        if (_isMoving)
+                        {
+                            int dx = mevt.Point.X - _previousPoint.X;
+                            int dy = mevt.Point.Y - _previousPoint.Y;
+
+                            // Only move not snaped window
+                            if (!_snapedWindows.ContainsKey(_currentWindow))
+                                MoveWindow(_currentWindow, dx, dy);
+
+                            _previousPoint = mevt.Point;
+
+                            // Try to snap
+                            SnapTo(_currentWindow, mevt.Point);
+
+                            // Prevent event to be forwarded
+                            //e.Handled = true;
+                        }
+                        else if (_isResizing)
+                        {
+                            int dx = mevt.Point.X - _previousPoint.X;
+                            int dy = mevt.Point.Y - _previousPoint.Y;
+
+                            ResizeWindow(_currentWindow, dx, dy);
+
+                            _previousPoint = mevt.Point;
+
+                            // Prevent event to be forwarded
+                            //e.Handled = true;
+                        }
                         break;
 
-                    case MouseMessage.WM_LBUTTONDBLCLK:
-                        message = "WM_LBUTTONDBLCLK";
-                        break;
-                    case MouseMessage.WM_RBUTTONDBLCLK:
-                        message = "WM_RBUTTONDBLCLK";
-                        break;
-                    case MouseMessage.WM_MBUTTONDBLCLK:
-                        message = "WM_MBUTTONDBLCLK";
+                    case MouseState.WM_LBUTTONUP:
+                    case MouseState.WM_RBUTTONUP:
+                    case MouseState.WM_MBUTTONUP:
+                        if (TestMoveMouseState(mevt))
+                        {
+                            if (_isMoving)
+                            {
+                                // Prevent event to be forwarded
+                                handled = true;
+                            }
+                            _isMoving = false;
+                        }
+                        else if (TestResizeMouseState(mevt))
+                        {
+                            if (_isResizing)
+                            {
+                                // Prevent event to be forwarded
+                                handled = true;
+                            }
+                            _isResizing = false;
+                        }
+
                         break;
 
-                    case MouseMessage.WM_MOUSEWHEEL:
-                        message = "WM_MOUSEWHEEL";
+                    case MouseState.WM_LBUTTONDBLCLK:
+                    case MouseState.WM_RBUTTONDBLCLK:
+                    case MouseState.WM_MBUTTONDBLCLK:
                         break;
-                    case MouseMessage.WM_MOUSEHWHEEL:
-                        message = "WM_MOUSEHWHEEL";
+
+                    case MouseState.WM_MOUSEWHEEL:
+                    case MouseState.WM_MOUSEHWHEEL:
                         break;
                 }
 
-                if (message.Length != 0)
-                    Console.WriteLine("[Mouse] msg:" + message
-                                      + " pt:" + "(" + mevt.Point.X + "," + mevt.Point.Y + ")"
-                                      + " mouseData:" + mevt.MouseData
-                                      + " time:" + mevt.Time
-                                      + " dwExtraInfo:" + mevt.ExtraInfo);
+                //if (message.Length != 0)
+                //    Console.WriteLine("[Mouse] msg:" + message
+                //                      + " pt:" + "(" + mevt.Point.X + "," + mevt.Point.Y + ")"
+                //                      + " mouseData:" + mevt.MouseData
+                //                      + " time:" + mevt.Time
+                //                      + " dwExtraInfo:" + mevt.ExtraInfo);
             }
         }
 
-        public static void KeyboardHook(LowLevelMessage evt, ref bool handled)
+        private static bool TestMoveKeyModifier()
         {
-            LowLevelKeyboardMessage kevt = evt as LowLevelKeyboardMessage;
+            Keys moveKeyModifier = TrayApp.OptionsManager.MoveOptions.keyModifier;
 
-            if (kevt != null)
+            return (((moveKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
+                && (((moveKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
+                && (((moveKeyModifier & Keys.Control) == Keys.Control) == _isControlDown);
+        }
+
+        private static bool TestMoveMouseState(LowLevelMouseMessage mevt)
+        {
+            MouseButtons mouseButton = MouseButtons.None;
+            switch ((MouseState)mevt.Message)
             {
-                String message = "";
+                case MouseState.WM_LBUTTONDOWN:
+                case MouseState.WM_LBUTTONUP:
+                    mouseButton = MouseButtons.Left;
+                    break;
+                case MouseState.WM_MBUTTONDOWN:
+                case MouseState.WM_MBUTTONUP:
+                    mouseButton = MouseButtons.Middle;
+                    break;
+                case MouseState.WM_RBUTTONDOWN:
+                case MouseState.WM_RBUTTONUP:
+                    mouseButton = MouseButtons.Right;
+                    break;
+            }
 
-                switch ((KeyboardMessage)kevt.Message)
+            return (TrayApp.OptionsManager.MoveOptions.mouseButton == mouseButton);
+        }
+
+        private static bool TestResizeKeyModifier()
+        {
+            Keys resizeKeyModifier = TrayApp.OptionsManager.ResizeOptions.keyModifier;
+
+            return (((resizeKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
+                && (((resizeKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
+                && (((resizeKeyModifier & Keys.Control) == Keys.Control) == _isControlDown);
+        }
+
+        private static bool TestResizeMouseState(LowLevelMouseMessage mevt)
+        {
+            MouseButtons mouseButton = MouseButtons.None;
+            switch ((MouseState)mevt.Message)
+            {
+                case MouseState.WM_LBUTTONDOWN:
+                case MouseState.WM_LBUTTONUP:
+                    mouseButton = MouseButtons.Left;
+                    break;
+                case MouseState.WM_MBUTTONDOWN:
+                case MouseState.WM_MBUTTONUP:
+                    mouseButton = MouseButtons.Middle;
+                    break;
+                case MouseState.WM_RBUTTONDOWN:
+                case MouseState.WM_RBUTTONUP:
+                    mouseButton = MouseButtons.Right;
+                    break;
+            }
+
+            return (TrayApp.OptionsManager.ResizeOptions.mouseButton == mouseButton);
+        }
+
+        private static WindowsQuarter GetQuarterFromPoint(SystemWindow window, Point point)
+        {
+            WindowsQuarter[,] dirs = {{WindowsQuarter.DIR_NW, WindowsQuarter.DIR_SW},
+                                      {WindowsQuarter.DIR_NE, WindowsQuarter.DIR_SE}};
+
+            RECT rect = window.Rectangle;
+
+            int horiz = (Math.Abs(point.X - rect.Left) < Math.Abs(point.X - rect.Right)) ? 0 : 1;
+            int vert = (Math.Abs(point.Y - rect.Top) < Math.Abs(point.Y - rect.Bottom)) ? 0 : 1;
+
+            return dirs[horiz, vert];
+        }
+
+        private static SystemWindow GetTopLevel(SystemWindow window)
+        {
+            if (window.ParentSymmetric == null)
+                return window;
+            return GetTopLevel(window.ParentSymmetric);
+        }
+
+        private static void MoveWindow(SystemWindow window, int dx, int dy)
+        {
+            // Do nothing on a maximized window
+            if ((window.Style & WindowStyleFlags.MAXIMIZE) != 0)
+                return;
+
+            // Move
+            Point oldLocation = window.Location;
+            window.Location = new Point(oldLocation.X + dx, oldLocation.Y + dy);
+        }
+
+        private static void ResizeWindow(SystemWindow window, int dx, int dy)
+        {
+            // Do nothing on a maximized window
+            if ((window.Style & WindowStyleFlags.MAXIMIZE) != 0)
+                return;
+
+            RECT rect = window.Rectangle;
+            int x, y, xsz, ysz;
+
+            switch (_clickedQuarter)
+            {
+                case WindowsQuarter.DIR_SW:
+                    dx = -dx;
+                    x = rect.Left - dx;
+                    y = rect.Top;
+                    break;
+                case WindowsQuarter.DIR_NW:
+                    dx = -dx;
+                    dy = -dy;
+                    x = rect.Left - dx;
+                    y = rect.Top - dy;
+                    break;
+                case WindowsQuarter.DIR_NE:
+                    dy = -dy;
+                    x = rect.Left;
+                    y = rect.Top - dy;
+                    break;
+                case WindowsQuarter.DIR_SE:
+                default:
+                    x = rect.Left;
+                    y = rect.Top;
+                    break;
+            }
+
+            xsz = rect.Right - rect.Left + dx;
+            ysz = rect.Bottom - rect.Top + dy;
+
+            // Resize
+            window.Location = new Point(x, y);
+            window.Size = new Size(xsz, ysz);
+        }
+
+        private static void SnapTo(SystemWindow window, Point point)
+        {
+            ///
+            ///  Snap/unsnap to top (maximize)
+            /// 
+            if (point.Y < SystemWindow.DesktopWindow.Rectangle.Top + TrayApp.OptionsManager.SnapOptions.TopDistance)
+            {
+                if (window.WindowState == FormWindowState.Normal)
                 {
-                    case KeyboardMessage.WM_KEYDOWN:
-                        message = "WM_KEYDOWN";
-                        break;
-                    case KeyboardMessage.WM_KEYUP:
-                        //message = "WM_KEYUP";
-                        break;
-                    case KeyboardMessage.WM_SYSKEYDOWN:
-                        message = "WM_SYSKEYDOWN";
-                        break;
-                    case KeyboardMessage.WM_SYSKEYUP:
-                        //message = "WM_SYSKEYUP";
-                        break;
+                    window.WindowState = FormWindowState.Maximized;
                 }
+            }
+            else
+            {
+                if (window.WindowState == FormWindowState.Maximized)
+                {
+                    window.WindowState = FormWindowState.Normal;
+                }
+            }
 
-                if (message.Length != 0)
-                    Console.WriteLine("[Keyboard] msg:" + message
-                                      + " vkCode:" + (VirtualKeys)kevt.VirtualKeyCode
-                                      + " scanCode:" + kevt.ScanCode
-                                      + " flags:" + kevt.KeyboardEventFlags
-                                      + " time:" + kevt.Time
-                                      + " dwExtraInfo:" + kevt.ExtraInfo);
+            ///
+            /// Snap/unsnap on left side
+            /// 
+            if (point.X < SystemWindow.DesktopWindow.Rectangle.Left + TrayApp.OptionsManager.SnapOptions.LeftDistance)
+            {
+                if (!_snapedWindows.ContainsKey(window))
+                {
+                    // Keep currentWindow position
+                    _snapedWindows.Add(window, window.Position);
 
-                handled = true;
+                    // Snap currentWindow
+                    window.Position = new RECT(SystemWindow.DesktopWindow.Location.X,
+                                                      SystemWindow.DesktopWindow.Location.Y,
+                                                      SystemWindow.DesktopWindow.Size.Width / 2,
+                                                      SystemWindow.DesktopWindow.Size.Height);
+                }
+            }
+
+            ///
+            /// Snap/unsnap on right side
+            /// 
+            else if (point.X > SystemWindow.DesktopWindow.Rectangle.Right - TrayApp.OptionsManager.SnapOptions.RightDistance)
+            {
+                if (!_snapedWindows.ContainsKey(window))
+                {
+                    // Keep currentWindow position
+                    _snapedWindows.Add(window, window.Position);
+
+                    // Snap currentWindow
+                    window.Position = new RECT(SystemWindow.DesktopWindow.Size.Width / 2,
+                                                      SystemWindow.DesktopWindow.Location.Y,
+                                                      SystemWindow.DesktopWindow.Size.Width,
+                                                      SystemWindow.DesktopWindow.Size.Height);
+                }
+            }
+            else if (_snapedWindows.ContainsKey(window))
+            {
+                // Restore currentWindow position
+                window.Position = _snapedWindows[window];
+                _snapedWindows.Remove(window);
             }
         }
+
+        #endregion
     }
 }
  

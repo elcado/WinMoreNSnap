@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TrayApp));
-            this.globalHookEventProvider = new Gma.UserActivityMonitor.GlobalEventProvider();
             this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.trayMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.activeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -79,14 +78,6 @@
             this.tabPage3.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // globalHookEventProvider
-            // 
-            this.globalHookEventProvider.MouseMoveExt += new System.EventHandler<Gma.UserActivityMonitor.MouseEventExtArgs>(this.globalHookEventProvider_MouseMoveExt);
-            this.globalHookEventProvider.KeyDown += new System.Windows.Forms.KeyEventHandler(this.globalHookEventProvider_KeyDown);
-            this.globalHookEventProvider.MouseDown += new System.Windows.Forms.MouseEventHandler(this.globalHookEventProvider_MouseDown);
-            this.globalHookEventProvider.MouseUp += new System.Windows.Forms.MouseEventHandler(this.globalHookEventProvider_MouseUp);
-            this.globalHookEventProvider.KeyUp += new System.Windows.Forms.KeyEventHandler(this.globalHookEventProvider_KeyUp);
             // 
             // trayIcon
             // 
@@ -552,7 +543,6 @@
 
         #endregion
 
-        private Gma.UserActivityMonitor.GlobalEventProvider globalHookEventProvider;
         private System.Windows.Forms.NotifyIcon trayIcon;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
