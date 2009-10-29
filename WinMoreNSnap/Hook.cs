@@ -502,8 +502,8 @@ namespace WinMoreNSnap
             LowLevelMouseMessage mevt = evt as LowLevelMouseMessage;
             if (mevt != null)
             {
-                MouseButtons moveMouseState = TrayApp.OptionsManager.MoveOptions.mouseButton;
-                MouseButtons resizeMouseState = TrayApp.OptionsManager.ResizeOptions.mouseButton;
+                MouseButtons moveMouseState = OptionsManager.MoveOptions.mouseButton;
+                MouseButtons resizeMouseState = OptionsManager.ResizeOptions.mouseButton;
 
                 switch ((MouseState)mevt.Message)
                 {
@@ -618,7 +618,7 @@ namespace WinMoreNSnap
 
         private static bool TestMoveKeyModifier()
         {
-            Keys moveKeyModifier = TrayApp.OptionsManager.MoveOptions.keyModifier;
+            Keys moveKeyModifier = OptionsManager.MoveOptions.keyModifier;
 
             return (((moveKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
                 && (((moveKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
@@ -644,12 +644,12 @@ namespace WinMoreNSnap
                     break;
             }
 
-            return (TrayApp.OptionsManager.MoveOptions.mouseButton == mouseButton);
+            return (OptionsManager.MoveOptions.mouseButton == mouseButton);
         }
 
         private static bool TestResizeKeyModifier()
         {
-            Keys resizeKeyModifier = TrayApp.OptionsManager.ResizeOptions.keyModifier;
+            Keys resizeKeyModifier = OptionsManager.ResizeOptions.keyModifier;
 
             return (((resizeKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
                 && (((resizeKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
@@ -675,7 +675,7 @@ namespace WinMoreNSnap
                     break;
             }
 
-            return (TrayApp.OptionsManager.ResizeOptions.mouseButton == mouseButton);
+            return (OptionsManager.ResizeOptions.mouseButton == mouseButton);
         }
 
         private static WindowsQuarter GetQuarterFromPoint(SystemWindow window, Point point)
@@ -756,7 +756,7 @@ namespace WinMoreNSnap
             ///
             ///  Snap/unsnap to top (maximize)
             /// 
-            if (point.Y < SystemWindow.DesktopWindow.Rectangle.Top + TrayApp.OptionsManager.SnapOptions.TopDistance)
+            if (point.Y < SystemWindow.DesktopWindow.Rectangle.Top + OptionsManager.SnapOptions.TopDistance)
             {
                 if (window.WindowState == FormWindowState.Normal)
                 {
@@ -774,7 +774,7 @@ namespace WinMoreNSnap
             ///
             /// Snap/unsnap on left side
             /// 
-            if (point.X < SystemWindow.DesktopWindow.Rectangle.Left + TrayApp.OptionsManager.SnapOptions.LeftDistance)
+            if (point.X < SystemWindow.DesktopWindow.Rectangle.Left + OptionsManager.SnapOptions.LeftDistance)
             {
                 if (!_snapedWindows.ContainsKey(window))
                 {
@@ -792,7 +792,7 @@ namespace WinMoreNSnap
             ///
             /// Snap/unsnap on right side
             /// 
-            else if (point.X > SystemWindow.DesktopWindow.Rectangle.Right - TrayApp.OptionsManager.SnapOptions.RightDistance)
+            else if (point.X > SystemWindow.DesktopWindow.Rectangle.Right - OptionsManager.SnapOptions.RightDistance)
             {
                 if (!_snapedWindows.ContainsKey(window))
                 {

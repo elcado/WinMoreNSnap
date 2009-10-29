@@ -8,12 +8,6 @@ namespace WinMoreNSnap
 {
     public partial class TrayApp : Form
     {
-        private static OptionsManager _optionsManager;
-        public static OptionsManager OptionsManager
-        {
-            get { return _optionsManager; }
-        }
-
         private readonly LowLevelMouseHook _mouse;
         private readonly LowLevelKeyboardHook _keyboard;
 
@@ -21,8 +15,8 @@ namespace WinMoreNSnap
         {
             InitializeComponent();
 
-            // The options manager
-            _optionsManager = new OptionsManager();
+            // Init the options manager w/ default options
+            GetOptions();
 
             // Set up the hooks
             _keyboard = new LowLevelKeyboardHook();
@@ -126,27 +120,34 @@ namespace WinMoreNSnap
         private void TrayApp_Load(object sender, EventArgs e)
         {
             Visible = false;
-
-            // Get default options
-            GetOptions();
         }
 
-        private void activeToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+        private void OnActiveStateChange(object sender, EventArgs e)
         {
             // Link activeToolStripMenuItem and checkBoxActive checked states
-            checkBoxActive.Checked = activeToolStripMenuItem.Checked;
+            if (sender is ToolStripMenuItem)
+                checkBoxActive.Checked = (sender as ToolStripMenuItem).Checked;
+            else if (sender is CheckBox)
+                checkBoxActive.Checked = (sender as CheckBox).Checked;
 
             // Change trayIcon.Icon
             ChangeTrayIconOnActiveStateChange();
-        }
 
-        private void checkBoxActive_CheckedChanged(object sender, EventArgs e)
-        {
-            // Link activeToolStripMenuItem and checkBoxActive checked states
-            activeToolStripMenuItem.Checked = checkBoxActive.Checked;
-
-            // Change trayIcon.Icon
-            ChangeTrayIconOnActiveStateChange();
+            // Hook/unhook
+            if (checkBoxActive.Checked)
+            {
+                if (!_mouse.Hooked)
+                    _mouse.StartHook();
+                if (!_keyboard.Hooked)
+                    _keyboard.StartHook();
+            }
+            else
+            {
+                if (_mouse.Hooked)
+                    _mouse.Unhook();
+                if (_keyboard.Hooked)
+                    _keyboard.Unhook();
+            }
         }
 
         private void ChangeTrayIconOnActiveStateChange()

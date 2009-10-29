@@ -94,7 +94,7 @@
             this.toolStripMenuItem1,
             this.quitToolStripMenuItem});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(137, 76);
+            this.trayMenu.Size = new System.Drawing.Size(153, 98);
             // 
             // activeToolStripMenuItem
             // 
@@ -102,26 +102,26 @@
             this.activeToolStripMenuItem.CheckOnClick = true;
             this.activeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.activeToolStripMenuItem.Name = "activeToolStripMenuItem";
-            this.activeToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.activeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.activeToolStripMenuItem.Text = "Active";
-            this.activeToolStripMenuItem.CheckedChanged += new System.EventHandler(this.activeToolStripMenuItem_CheckedChanged);
+            this.activeToolStripMenuItem.CheckedChanged += new System.EventHandler(this.OnActiveStateChange);
             // 
             // settingsToolStripMenuItem
             // 
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(133, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -171,7 +171,7 @@
             this.checkBoxActive.TabIndex = 0;
             this.checkBoxActive.Text = "Active";
             this.checkBoxActive.UseVisualStyleBackColor = true;
-            this.checkBoxActive.CheckedChanged += new System.EventHandler(this.checkBoxActive_CheckedChanged);
+            this.checkBoxActive.CheckedChanged += new System.EventHandler(this.OnActiveStateChange);
             // 
             // tabPage2
             // 

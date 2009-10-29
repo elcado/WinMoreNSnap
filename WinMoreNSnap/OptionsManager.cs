@@ -4,9 +4,9 @@ namespace WinMoreNSnap
 {
     public class OptionsManager
     {
-        public KBMOptions MoveOptions;
-        public KBMOptions ResizeOptions;
-        public SnapingOptions SnapOptions;
+        public static KBMOptions MoveOptions;
+        public static KBMOptions ResizeOptions;
+        public static SnapingOptions SnapOptions;
 
         /// <summary>
         /// Keyboard and mouse options
