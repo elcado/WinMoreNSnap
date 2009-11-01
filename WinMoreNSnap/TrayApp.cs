@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using ManagedWinapi.Hooks;
@@ -152,14 +153,10 @@ namespace WinMoreNSnap
 
         private void ChangeTrayIconOnActiveStateChange()
         {
-            if (activeToolStripMenuItem.Checked)
-            {
-                trayIcon.Icon = new Icon("Resources/trayon.ico");
-            }
-            else
-            {
-                trayIcon.Icon = new Icon("Resources/trayoff.ico");
-            }
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+
+            trayIcon.Icon = activeToolStripMenuItem.Checked ? new Icon(assembly.GetManifestResourceStream("WinMoreNSnap.icon.ico"))
+                                                            : new Icon(assembly.GetManifestResourceStream("WinMoreNSnap.icon_off.ico"));
         }
 
         private void buttonHide_Click(object sender, EventArgs e)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using ManagedWinapi.Hooks;
@@ -434,7 +435,7 @@ namespace WinMoreNSnap
 // ReSharper restore UnusedMember.Local
         }
 
-        private enum WindowsQuarter { DIR_NONE, DIR_NE, DIR_NW, DIR_SE, DIR_SW };
+        internal enum WindowsQuarter { DIR_NONE, DIR_NE, DIR_NW, DIR_SE, DIR_SW };
 
         #endregion
 
@@ -521,10 +522,13 @@ namespace WinMoreNSnap
                             //... from here to somewhere.
                             _previousPoint = mevt.Point;
 
+                            // Set cursor
+                            SystemCursor.SetSystemCursor(Cursors.SizeAll);
+
                             // Prevent event to be forwarded
                             handled = true;
                         }
-                        else if (TestResizeKeyModifier() && TestResizeMouseState(mevt))
+                        else if (!_isMoving && TestResizeKeyModifier() && TestResizeMouseState(mevt))
                         {
                             // Now we are resizing...
                             _isResizing = true;
@@ -535,6 +539,12 @@ namespace WinMoreNSnap
                             //... from this point/quarter.
                             _previousPoint = mevt.Point;
                             _clickedQuarter = GetQuarterFromPoint(_currentWindow, mevt.Point);
+
+                            // Set cursor
+                            if ((_clickedQuarter == WindowsQuarter.DIR_NW) || (_clickedQuarter == WindowsQuarter.DIR_SE))
+                                SystemCursor.SetSystemCursor(Cursors.SizeNWSE);
+                            else if ((_clickedQuarter == WindowsQuarter.DIR_NE) || (_clickedQuarter == WindowsQuarter.DIR_SW))
+                                SystemCursor.SetSystemCursor(Cursors.SizeNESW);
 
                             // Prevent event to be forwarded
                             handled = true;
@@ -582,6 +592,10 @@ namespace WinMoreNSnap
                             {
                                 // Prevent event to be forwarded
                                 handled = true;
+
+                                // Restore cursor
+                                SystemCursor.RestoreSystemCursor();
+                                //SystemCursor.SetSystemCursor(Cursors.Default);
                             }
                             _isMoving = false;
                         }
@@ -591,6 +605,10 @@ namespace WinMoreNSnap
                             {
                                 // Prevent event to be forwarded
                                 handled = true;
+
+                                // Restore cursor
+                                SystemCursor.RestoreSystemCursor();
+                                //SystemCursor.SetSystemCursor(Cursors.Default);
                             }
                             _isResizing = false;
                         }

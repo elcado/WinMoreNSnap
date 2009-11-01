@@ -59,26 +59,5 @@ namespace WinMoreNSnap.Properties {
                 resourceCulture = value;
             }
         }
-        
-        internal static System.Drawing.Icon icon {
-            get {
-                object obj = ResourceManager.GetObject("icon", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        internal static System.Drawing.Icon trayoff {
-            get {
-                object obj = ResourceManager.GetObject("trayoff", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        internal static System.Drawing.Icon trayon {
-            get {
-                object obj = ResourceManager.GetObject("trayon", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
     }
 }

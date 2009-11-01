@@ -12,6 +12,7 @@
     <AssemblyName>WinMoreNSnap</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -39,6 +40,9 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Windows.Presentation">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -54,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Hook.cs" />
     <Compile Include="OptionsManager.cs" />
+    <Compile Include="SystemCursor.cs" />
     <Compile Include="TrayApp.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -87,19 +92,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\icon.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Include="icon.ico" />
+    <EmbeddedResource Include="icon_off.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\trayoff.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\trayon.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Content Include="icon_ne.ico" />
+    <Content Include="icon_nw.ico" />
+    <Content Include="icon_se.ico" />
+    <Content Include="icon_sw.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
