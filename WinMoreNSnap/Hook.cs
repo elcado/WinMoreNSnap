@@ -772,27 +772,34 @@ namespace WinMoreNSnap
         private static void SnapTo(SystemWindow window, Point point)
         {
             ///
+            /// First get curent monitor info
+            /// 
+            IntPtr hMonitor = MonitorFromPoint(point, (uint) MonitorFromPointFlag.MONITOR_DEFAULTTONEAREST);
+
+            MonitorInfoEx currentMonitorInfo = new MonitorInfoEx();
+            currentMonitorInfo.cbSize = (uint)Marshal.SizeOf(typeof(MonitorInfoEx));
+            GetMonitorInfo(hMonitor, ref currentMonitorInfo);
+
+            RECT workRect = currentMonitorInfo.rcWork;
+
+            ///
             ///  Snap/unsnap to top (maximize)
             /// 
-            if (point.Y < SystemWindow.DesktopWindow.Rectangle.Top + OptionsManager.SnapOptions.TopDistance)
+            if (point.Y < workRect.Top + OptionsManager.SnapOptions.TopDistance)
             {
                 if (window.WindowState == FormWindowState.Normal)
-                {
                     window.WindowState = FormWindowState.Maximized;
-                }
             }
             else
             {
                 if (window.WindowState == FormWindowState.Maximized)
-                {
                     window.WindowState = FormWindowState.Normal;
-                }
             }
 
             ///
             /// Snap/unsnap on left side
             /// 
-            if (point.X < SystemWindow.DesktopWindow.Rectangle.Left + OptionsManager.SnapOptions.LeftDistance)
+            if (point.X < workRect.Left + OptionsManager.SnapOptions.LeftDistance)
             {
                 if (!_snapedWindows.ContainsKey(window))
                 {
@@ -800,17 +807,17 @@ namespace WinMoreNSnap
                     _snapedWindows.Add(window, window.Position);
 
                     // Snap currentWindow
-                    window.Position = new RECT(SystemWindow.DesktopWindow.Location.X,
-                                                      SystemWindow.DesktopWindow.Location.Y,
-                                                      SystemWindow.DesktopWindow.Size.Width / 2,
-                                                      SystemWindow.DesktopWindow.Size.Height);
+                    window.Position = new RECT(workRect.Location.X,
+                                               workRect.Location.Y,
+                                               workRect.Size.Width / 2,
+                                               workRect.Size.Height);
                 }
             }
 
             ///
             /// Snap/unsnap on right side
             /// 
-            else if (point.X > SystemWindow.DesktopWindow.Rectangle.Right - OptionsManager.SnapOptions.RightDistance)
+            else if (point.X > workRect.Right - OptionsManager.SnapOptions.RightDistance)
             {
                 if (!_snapedWindows.ContainsKey(window))
                 {
@@ -818,10 +825,10 @@ namespace WinMoreNSnap
                     _snapedWindows.Add(window, window.Position);
 
                     // Snap currentWindow
-                    window.Position = new RECT(SystemWindow.DesktopWindow.Size.Width / 2,
-                                                      SystemWindow.DesktopWindow.Location.Y,
-                                                      SystemWindow.DesktopWindow.Size.Width,
-                                                      SystemWindow.DesktopWindow.Size.Height);
+                    window.Position = new RECT(workRect.Size.Width / 2,
+                                               workRect.Location.Y,
+                                               workRect.Size.Width,
+                                               workRect.Size.Height);
                 }
             }
             else if (_snapedWindows.ContainsKey(window))
@@ -831,6 +838,32 @@ namespace WinMoreNSnap
                 _snapedWindows.Remove(window);
             }
         }
+
+        #endregion
+
+        #region Native imports
+
+        internal enum MonitorFromPointFlag : uint
+        {
+            MONITOR_DEFAULTTONULL     =  0x00000000,
+            MONITOR_DEFAULTTOPRIMARY  =  0x00000001,
+            MONITOR_DEFAULTTONEAREST  =  0x00000002
+        }
+
+        [DllImport("user32.dll")]
+        static extern IntPtr MonitorFromPoint(Point pt, uint dwFlags);
+
+        [StructLayoutAttribute(LayoutKind.Sequential)]
+        public struct MonitorInfoEx
+        {
+            public uint cbSize;
+            public RECT rcMonitor;
+            public RECT rcWork;
+            public uint dwFlags;
+        }
+
+        [DllImport("user32.dll")]
+        static extern bool GetMonitorInfo(IntPtr hMonitor, ref MonitorInfoEx lpmi);
 
         #endregion
     }
