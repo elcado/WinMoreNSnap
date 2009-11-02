@@ -639,10 +639,10 @@ namespace WinMoreNSnap
         {
             Keys moveKeyModifier = OptionsManager.MoveOptions.keyModifier;
 
-            //return (((moveKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
-            //    && (((moveKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
-            //    && (((moveKeyModifier & Keys.Control) == Keys.Control) == _isControlDown);
-            return (moveKeyModifier & TrayApp.ModifierKeys) == moveKeyModifier;
+            return (((moveKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
+                && (((moveKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
+                && (((moveKeyModifier & Keys.Control) == Keys.Control) == _isControlDown);
+            //return (moveKeyModifier & TrayApp.ModifierKeys) == moveKeyModifier;
         }
 
         private static bool TestMoveMouseState(LowLevelMouseMessage mevt)
@@ -674,6 +674,7 @@ namespace WinMoreNSnap
             return (((resizeKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
                 && (((resizeKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
                 && (((resizeKeyModifier & Keys.Control) == Keys.Control) == _isControlDown);
+            //return (resizeKeyModifier & TrayApp.ModifierKeys) == resizeKeyModifier;
         }
 
         private static bool TestResizeMouseState(LowLevelMouseMessage mevt)
@@ -774,15 +775,9 @@ namespace WinMoreNSnap
         private static void SnapTo(SystemWindow window, Point point)
         {
             ///
-            /// First get curent monitor info
+            /// Get curent monitor working area
             /// 
-            IntPtr hMonitor = MonitorFromPoint(point, (uint) MonitorFromPointFlag.MONITOR_DEFAULTTONEAREST);
-
-            MonitorInfoEx currentMonitorInfo = new MonitorInfoEx();
-            currentMonitorInfo.cbSize = (uint)Marshal.SizeOf(typeof(MonitorInfoEx));
-            GetMonitorInfo(hMonitor, ref currentMonitorInfo);
-
-            RECT workRect = currentMonitorInfo.rcWork;
+            Rectangle workRect = Screen.FromPoint(point).WorkingArea;
 
             ///
             ///  Snap/unsnap to top (maximize)
@@ -791,8 +786,6 @@ namespace WinMoreNSnap
             {
                 if (window.WindowState == FormWindowState.Normal)
                 {
-                    AnimateCursor();
-
                     window.WindowState = FormWindowState.Maximized;
                 }
             }
@@ -856,14 +849,34 @@ namespace WinMoreNSnap
             }
         }
 
-        private static void AnimateCursor()
+        [DllImport("user32.dll")]
+        static extern IntPtr GetWindowDC(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
+        [DllImport("gdi32.dll")]
+        static extern IntPtr CreateDC(string lpszDriver, string lpszDevice, string lpszOutput, IntPtr lpInitData);
+        [DllImport("gdi32.dll")]
+        static extern bool DeleteDC(IntPtr hdc);
+
+        private static void AnimateCursorOnWindow(SystemWindow window, Point point)
         {
-            //Graphics g = TrayApp.ModifierKeys
-            //Font font = new Font("Arial", 7);
-            //SolidBrush solidBrush = new SolidBrush(Color.Brown);
-            //Pen pen = new Pen(Color.Black, 2);
-            //g.DrawString("1001", font, solidBrush, 25, 30);
-            //g.DrawEllipse(pen, 25, 25, 25, 25); 
+            // Create a device context that cover the whole display (all monitors)
+            IntPtr hDC = CreateDC("DISPLAY", "", "", IntPtr.Zero);
+
+            // Get a graphics
+            using ( Graphics g = Graphics.FromHdc(hDC) )
+            {
+                // Draw a circle
+                Pen pen = new Pen(Color.Green, 2);
+                int radius = 30;
+                
+                g.DrawEllipse(pen, point.X - radius / 2, point.Y - radius / 2,
+                                   radius, radius);
+            }
+
+            // Delete the device context
+            DeleteDC(hDC);
         }
 
         #endregion

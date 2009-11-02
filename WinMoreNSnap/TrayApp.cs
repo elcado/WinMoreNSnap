@@ -106,6 +106,7 @@ namespace WinMoreNSnap
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            this.TopMost = true;
             this.Show();
         }
 
