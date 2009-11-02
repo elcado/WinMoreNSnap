@@ -512,13 +512,13 @@ namespace WinMoreNSnap
                     case MouseState.WM_LBUTTONDOWN:
                     case MouseState.WM_RBUTTONDOWN:
                     case MouseState.WM_MBUTTONDOWN:
+                        // Get the window to move or resize
+                        _currentWindow = GetTopLevel(SystemWindow.FromPoint(mevt.Point.X, mevt.Point.Y));
+
                         if (TestMoveKeyModifier() && TestMoveMouseState(mevt))
                         {
                             // Now we are moving...
                             _isMoving = true;
-
-                            //... this window...
-                            _currentWindow = GetTopLevel(SystemWindow.FromPoint(mevt.Point.X, mevt.Point.Y));
 
                             //... from here to somewhere.
                             _previousPoint = mevt.Point;
@@ -529,13 +529,14 @@ namespace WinMoreNSnap
                             // Prevent event to be forwarded
                             handled = true;
                         }
-                        else if (!_isMoving && TestResizeKeyModifier() && TestResizeMouseState(mevt))
+                        // Check that:
+                        // - we are allowed to resize
+                        // - we are not moving
+                        // - keys and mouse buttons respect the options
+                        else if (_currentWindow.Resizable && !_isMoving && TestResizeKeyModifier() && TestResizeMouseState(mevt))
                         {
                             // Now we are resizing...
                             _isResizing = true;
-
-                            //... this window...
-                            _currentWindow = GetTopLevel(SystemWindow.FromPoint(mevt.Point.X, mevt.Point.Y));
 
                             //... from this point/quarter.
                             _previousPoint = mevt.Point;
