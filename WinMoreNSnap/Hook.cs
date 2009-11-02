@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -883,29 +884,33 @@ namespace WinMoreNSnap
                                                {
                                                    const int radius = 30;
 
-                                                   g.Clip = new Region(new Rectangle(point.X - radius / 2, point.Y - radius / 2,
-                                                                                     radius, radius));
+                                                   g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                                                   g.Clip = new Region(new Rectangle(point.X - (radius + 5) / 2, point.Y - (radius + 5) / 2,
+                                                                                     radius + 5, radius + 5));
 
                                                    // Draw a growing circle upon the cursor
-                                                   Brush brush = Brushes.White;
-                                                   Pen penLG = new Pen(Color.LightGray, 1);
+                                                   Pen penLG = new Pen(Color.LightGray, 2);
                                                    Pen penDG = new Pen(Color.DarkGray, 1);
                                                    Pen penB = new Pen(Color.Black, 1);
 
-                                                   for (int i = 0; i < radius; i++ )
+                                                   for (int j = 0; j < 2; j++)
                                                    {
-                                                       Rectangle ellRect = new Rectangle(point.X - i / 2, point.Y - i / 2, i, i);
+                                                       for (int i = 0; i < radius; i+=2)
+                                                       {
+                                                           Rectangle ellRect = new Rectangle(point.X - i / 2, point.Y - i / 2, i, i);
 
-                                                       g.FillEllipse(brush, ellRect);
-                                                       ellRect.Inflate(1, 1);
-                                                       g.DrawEllipse(penDG, ellRect);
-                                                       ellRect.Inflate(1, 1);
-                                                       g.DrawEllipse(penB, ellRect);
-                                                       ellRect.Inflate(1, 1);
-                                                       g.DrawEllipse(penLG, ellRect);
-                                                       ellRect.Inflate(1, 1);
+                                                           g.DrawEllipse(penDG, ellRect);
+                                                           ellRect.Inflate(1, 1);
+                                                           g.DrawEllipse(penB, ellRect);
+                                                           ellRect.Inflate(1, 1);
+                                                           g.DrawEllipse(penLG, ellRect);
+
+                                                           Thread.Sleep(2);
+                                                           
+                                                           window.Refresh();
+                                                       }
                                                    }
-                                                   window.Refresh();
                                                }
 
                                                // Delete the device context
