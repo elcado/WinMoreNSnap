@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 
 using ManagedWinapi.Hooks;
@@ -787,6 +788,10 @@ namespace WinMoreNSnap
             {
                 if (window.WindowState == FormWindowState.Normal)
                 {
+                    // Highligh the snap point
+                    AnimateCursorOnWindow(window, point);
+
+                    // Maximize
                     window.WindowState = FormWindowState.Maximized;
                 }
             }
@@ -804,6 +809,9 @@ namespace WinMoreNSnap
                 // Only snap window that are not already snaped
                 if (!_leftSnapedWindows.ContainsKey(window) && !_rightSnapedWindows.ContainsKey(window))
                 {
+                    // Highligh the snap point
+                    AnimateCursorOnWindow(window, point);
+
                     // Keep currentWindow position
                     _leftSnapedWindows.Add(window, window.Position);
 
@@ -823,6 +831,9 @@ namespace WinMoreNSnap
                 // Only snap window that are not already snaped
                 if (!_rightSnapedWindows.ContainsKey(window) && !_leftSnapedWindows.ContainsKey(window))
                 {
+                    // Highligh the snap point
+                    AnimateCursorOnWindow(window, point);
+
                     // Keep currentWindow position
                     _rightSnapedWindows.Add(window, window.Position);
 
@@ -862,22 +873,32 @@ namespace WinMoreNSnap
 
         private static void AnimateCursorOnWindow(SystemWindow window, Point point)
         {
-            // Create a device context that cover the whole display (all monitors)
-            IntPtr hDC = CreateDC("DISPLAY", "", "", IntPtr.Zero);
+            new Thread(new ThreadStart(delegate
+                                           {
+                                               // Create a device context that cover the whole display (all monitors)
+                                               IntPtr hDC = CreateDC("DISPLAY", "", "",
+                                                                     IntPtr.Zero);
 
-            // Get a graphics
-            using ( Graphics g = Graphics.FromHdc(hDC) )
-            {
-                // Draw a circle
-                Pen pen = new Pen(Color.Green, 2);
-                int radius = 30;
-                
-                g.DrawEllipse(pen, point.X - radius / 2, point.Y - radius / 2,
-                                   radius, radius);
-            }
+                                               // Get a graphics
+                                               using (Graphics g = Graphics.FromHdc(hDC))
+                                               {
+                                                   // Draw a growing circle upon the cursor
+                                                   Pen pen = new Pen(Color.Green, 3);
+                                                   const int radius = 40;
+                                                   for (int i = 10; i < radius; i += 2)
+                                                   {
+                                                       g.DrawEllipse(pen, point.X - i/2,
+                                                                     point.Y - i/2,
+                                                                     i, i);
+                                                       window.Refresh();
+                                                   }
 
-            // Delete the device context
-            DeleteDC(hDC);
+                                               }
+
+                                               // Delete the device context
+                                               DeleteDC(hDC);
+                                           }
+                           )).Start();
         }
 
         #endregion
