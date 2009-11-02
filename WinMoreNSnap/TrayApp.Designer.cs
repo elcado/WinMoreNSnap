@@ -83,8 +83,9 @@
             // 
             this.trayIcon.ContextMenuStrip = this.trayMenu;
             this.trayIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("trayIcon.Icon")));
-            this.trayIcon.Text = "trayIcon";
+            this.trayIcon.Text = "WinMoreNSnap";
             this.trayIcon.Visible = true;
+            this.trayIcon.DoubleClick += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
             // trayMenu
             // 
@@ -94,7 +95,7 @@
             this.toolStripMenuItem1,
             this.quitToolStripMenuItem});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(137, 76);
+            this.trayMenu.Size = new System.Drawing.Size(153, 98);
             // 
             // activeToolStripMenuItem
             // 
@@ -102,26 +103,27 @@
             this.activeToolStripMenuItem.CheckOnClick = true;
             this.activeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.activeToolStripMenuItem.Name = "activeToolStripMenuItem";
-            this.activeToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.activeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.activeToolStripMenuItem.Text = "Active";
             this.activeToolStripMenuItem.CheckedChanged += new System.EventHandler(this.OnActiveStateChange);
             // 
             // settingsToolStripMenuItem
             // 
+            this.settingsToolStripMenuItem.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold);
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(133, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
