@@ -496,7 +496,8 @@ namespace WinMoreNSnap
         private static bool _isMoving, _isResizing;
         private static Point _previousPoint;
         private static WindowsQuarter _clickedQuarter;
-        private static Dictionary<SystemWindow, RECT> _snapedWindows = new Dictionary<SystemWindow, RECT>();
+        private static Dictionary<SystemWindow, RECT> _leftSnapedWindows = new Dictionary<SystemWindow, RECT>();
+        private static Dictionary<SystemWindow, RECT> _rightSnapedWindows = new Dictionary<SystemWindow, RECT>();
 
         public static void MouseHook(LowLevelMessage evt, ref bool handled)
         {
@@ -558,7 +559,7 @@ namespace WinMoreNSnap
                             int dy = mevt.Point.Y - _previousPoint.Y;
 
                             // Only move not snaped window
-                            if (!_snapedWindows.ContainsKey(_currentWindow))
+                            if (!_leftSnapedWindows.ContainsKey(_currentWindow) && !_rightSnapedWindows.ContainsKey(_currentWindow))
                                 MoveWindow(_currentWindow, dx, dy);
 
                             _previousPoint = mevt.Point;
@@ -638,9 +639,10 @@ namespace WinMoreNSnap
         {
             Keys moveKeyModifier = OptionsManager.MoveOptions.keyModifier;
 
-            return (((moveKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
-                && (((moveKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
-                && (((moveKeyModifier & Keys.Control) == Keys.Control) == _isControlDown);
+            //return (((moveKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
+            //    && (((moveKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
+            //    && (((moveKeyModifier & Keys.Control) == Keys.Control) == _isControlDown);
+            return (moveKeyModifier & TrayApp.ModifierKeys) == moveKeyModifier;
         }
 
         private static bool TestMoveMouseState(LowLevelMouseMessage mevt)
@@ -788,7 +790,11 @@ namespace WinMoreNSnap
             if (point.Y < workRect.Top + OptionsManager.SnapOptions.TopDistance)
             {
                 if (window.WindowState == FormWindowState.Normal)
+                {
+                    AnimateCursor();
+
                     window.WindowState = FormWindowState.Maximized;
+                }
             }
             else
             {
@@ -801,10 +807,11 @@ namespace WinMoreNSnap
             /// 
             if (point.X < workRect.Left + OptionsManager.SnapOptions.LeftDistance)
             {
-                if (!_snapedWindows.ContainsKey(window))
+                // Only snap window that are not already snaped
+                if (!_leftSnapedWindows.ContainsKey(window) && !_rightSnapedWindows.ContainsKey(window))
                 {
                     // Keep currentWindow position
-                    _snapedWindows.Add(window, window.Position);
+                    _leftSnapedWindows.Add(window, window.Position);
 
                     // Snap currentWindow
                     window.Position = new RECT(workRect.Location.X,
@@ -819,10 +826,11 @@ namespace WinMoreNSnap
             /// 
             else if (point.X > workRect.Right - OptionsManager.SnapOptions.RightDistance)
             {
-                if (!_snapedWindows.ContainsKey(window))
+                // Only snap window that are not already snaped
+                if (!_rightSnapedWindows.ContainsKey(window) && !_leftSnapedWindows.ContainsKey(window))
                 {
                     // Keep currentWindow position
-                    _snapedWindows.Add(window, window.Position);
+                    _rightSnapedWindows.Add(window, window.Position);
 
                     // Snap currentWindow
                     window.Position = new RECT(workRect.Size.Width / 2,
@@ -831,12 +839,31 @@ namespace WinMoreNSnap
                                                workRect.Size.Height);
                 }
             }
-            else if (_snapedWindows.ContainsKey(window))
+
+            ///
+            /// Try to restore from left or right snap zones
+            else if (_leftSnapedWindows.ContainsKey(window))
             {
                 // Restore currentWindow position
-                window.Position = _snapedWindows[window];
-                _snapedWindows.Remove(window);
+                window.Position = _leftSnapedWindows[window];
+                _leftSnapedWindows.Remove(window);
             }
+            else if (_rightSnapedWindows.ContainsKey(window))
+            {
+                // Restore currentWindow position
+                window.Position = _rightSnapedWindows[window];
+                _rightSnapedWindows.Remove(window);
+            }
+        }
+
+        private static void AnimateCursor()
+        {
+            //Graphics g = TrayApp.ModifierKeys
+            //Font font = new Font("Arial", 7);
+            //SolidBrush solidBrush = new SolidBrush(Color.Brown);
+            //Pen pen = new Pen(Color.Black, 2);
+            //g.DrawString("1001", font, solidBrush, 25, 30);
+            //g.DrawEllipse(pen, 25, 25, 25, 25); 
         }
 
         #endregion
