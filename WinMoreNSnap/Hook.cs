@@ -876,23 +876,36 @@ namespace WinMoreNSnap
             new Thread(new ThreadStart(delegate
                                            {
                                                // Create a device context that cover the whole display (all monitors)
-                                               IntPtr hDC = CreateDC("DISPLAY", "", "",
-                                                                     IntPtr.Zero);
+                                               IntPtr hDC = CreateDC("DISPLAY", "", "", IntPtr.Zero);
 
                                                // Get a graphics
                                                using (Graphics g = Graphics.FromHdc(hDC))
                                                {
-                                                   // Draw a growing circle upon the cursor
-                                                   Pen pen = new Pen(Color.Green, 3);
-                                                   const int radius = 40;
-                                                   for (int i = 10; i < radius; i += 2)
-                                                   {
-                                                       g.DrawEllipse(pen, point.X - i/2,
-                                                                     point.Y - i/2,
-                                                                     i, i);
-                                                       window.Refresh();
-                                                   }
+                                                   const int radius = 30;
 
+                                                   g.Clip = new Region(new Rectangle(point.X - radius / 2, point.Y - radius / 2,
+                                                                                     radius, radius));
+
+                                                   // Draw a growing circle upon the cursor
+                                                   Brush brush = Brushes.White;
+                                                   Pen penLG = new Pen(Color.LightGray, 1);
+                                                   Pen penDG = new Pen(Color.DarkGray, 1);
+                                                   Pen penB = new Pen(Color.Black, 1);
+
+                                                   for (int i = 0; i < radius; i++ )
+                                                   {
+                                                       Rectangle ellRect = new Rectangle(point.X - i / 2, point.Y - i / 2, i, i);
+
+                                                       g.FillEllipse(brush, ellRect);
+                                                       ellRect.Inflate(1, 1);
+                                                       g.DrawEllipse(penDG, ellRect);
+                                                       ellRect.Inflate(1, 1);
+                                                       g.DrawEllipse(penB, ellRect);
+                                                       ellRect.Inflate(1, 1);
+                                                       g.DrawEllipse(penLG, ellRect);
+                                                       ellRect.Inflate(1, 1);
+                                                   }
+                                                   window.Refresh();
                                                }
 
                                                // Delete the device context
