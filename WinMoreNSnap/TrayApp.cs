@@ -121,7 +121,7 @@ namespace WinMoreNSnap
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Show();
+            this.Visible = true;
             this.Activate();
         }
 
@@ -129,14 +129,14 @@ namespace WinMoreNSnap
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
-                this.Hide();
+                this.Visible = false;
                 e.Cancel = true;
             }
         }
 
         private void TrayApp_Load(object sender, EventArgs e)
         {
-            Visible = false;
+            this.Hide();
         }
 
         private void OnActiveStateChange(object sender, EventArgs e)
@@ -177,7 +177,7 @@ namespace WinMoreNSnap
 
         private void buttonHide_Click(object sender, EventArgs e)
         {
-            this.Hide();
+            this.Visible = false;
         }
 
         private void cbCheckedChanged(object sender, EventArgs e)
@@ -185,5 +185,10 @@ namespace WinMoreNSnap
             buttonSave.Enabled = true;
         }
 
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutBox box = new AboutBox();
+            box.ShowDialog(this);
+        }
     }
 }

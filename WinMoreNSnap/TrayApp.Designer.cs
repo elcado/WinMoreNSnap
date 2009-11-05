@@ -69,6 +69,7 @@
             this.tbSnapDistTop = new System.Windows.Forms.TextBox();
             this.buttonHide = new System.Windows.Forms.Button();
             this.buttonSave = new System.Windows.Forms.Button();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.trayMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -93,9 +94,10 @@
             this.activeToolStripMenuItem,
             this.settingsToolStripMenuItem,
             this.toolStripMenuItem1,
+            this.aboutToolStripMenuItem,
             this.quitToolStripMenuItem});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(142, 76);
+            this.trayMenu.Size = new System.Drawing.Size(142, 98);
             // 
             // activeToolStripMenuItem
             // 
@@ -103,7 +105,7 @@
             this.activeToolStripMenuItem.CheckOnClick = true;
             this.activeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.activeToolStripMenuItem.Name = "activeToolStripMenuItem";
-            this.activeToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.activeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.activeToolStripMenuItem.Text = "Active";
             this.activeToolStripMenuItem.CheckedChanged += new System.EventHandler(this.OnActiveStateChange);
             // 
@@ -111,19 +113,19 @@
             // 
             this.settingsToolStripMenuItem.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold);
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(138, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -505,6 +507,13 @@
             this.buttonSave.UseVisualStyleBackColor = true;
             this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
             // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Text = "About...";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
+            // 
             // TrayApp
             // 
             this.AcceptButton = this.buttonSave;
@@ -516,11 +525,12 @@
             this.Controls.Add(this.buttonHide);
             this.Controls.Add(this.buttonSave);
             this.Cursor = System.Windows.Forms.Cursors.Default;
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "TrayApp";
+            this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "WinMoreNSnap settings";
@@ -584,6 +594,7 @@
         private System.Windows.Forms.TextBox tbSnapDistBottom;
         private System.Windows.Forms.TextBox tbSnapDistRight;
         private System.Windows.Forms.TextBox tbSnapDistTop;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
     }
 }
 

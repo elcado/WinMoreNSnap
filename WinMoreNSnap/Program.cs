@@ -15,7 +15,11 @@ namespace WinMoreNSnap
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new TrayApp());
+
+            var appSingleton = new System.Threading.Mutex(false, "SingleInstance WinMoreNSnap");
+            if (appSingleton.WaitOne(0, false))
+                Application.Run(new TrayApp());
+            appSingleton.Close();
         }
     }
 }

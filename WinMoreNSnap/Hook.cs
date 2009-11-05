@@ -791,9 +791,12 @@ namespace WinMoreNSnap
             }
             else
             {
-                // Unsnap from maximized
+                // Unsnap from maximized and center window on mouse
                 if (window.WindowState == FormWindowState.Maximized)
+                {
                     window.WindowState = FormWindowState.Normal;
+                    window.Location = new Point(point.X - window.Size.Width / 2, point.Y - window.Size.Height / 2);
+                }
             }
 
             ///
@@ -844,14 +847,18 @@ namespace WinMoreNSnap
             /// Try to restore from left or right snap zones
             else if (_leftSnapedWindows.ContainsKey(window))
             {
-                // Restore currentWindow position
-                window.Position = _leftSnapedWindows[window];
+                // Restore currentWindow size and center window on mouse
+                window.Size = _leftSnapedWindows[window].Size;
+                window.Location = new Point(point.X - window.Size.Width / 2, point.Y - window.Size.Height / 2);
+
                 _leftSnapedWindows.Remove(window);
             }
             else if (_rightSnapedWindows.ContainsKey(window))
             {
-                // Restore currentWindow position
-                window.Position = _rightSnapedWindows[window];
+                // Restore currentWindow size and center window on mouse
+                window.Size = _rightSnapedWindows[window].Size;
+                window.Location = new Point(point.X - window.Size.Width / 2, point.Y - window.Size.Height / 2);
+
                 _rightSnapedWindows.Remove(window);
             }
         }
@@ -902,8 +909,6 @@ namespace WinMoreNSnap
                                                            g.DrawEllipse(penDG, ellRect);
                                                            ellRect.Inflate(1, 1);
                                                            g.DrawEllipse(penLG, ellRect);
-
-                                                           Thread.Sleep(500);
 
                                                            //g.Clear(Color.Transparent);
 
