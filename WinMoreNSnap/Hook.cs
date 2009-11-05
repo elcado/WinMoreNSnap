@@ -506,8 +506,8 @@ namespace WinMoreNSnap
             LowLevelMouseMessage mevt = evt as LowLevelMouseMessage;
             if (mevt != null)
             {
-                MouseButtons moveMouseState = OptionsManager.MoveOptions.mouseButton;
-                MouseButtons resizeMouseState = OptionsManager.ResizeOptions.mouseButton;
+                MouseButtons moveMouseState = Program.Options.MoveOptions.mouseButton;
+                MouseButtons resizeMouseState = Program.Options.ResizeOptions.mouseButton;
 
                 switch ((MouseState)mevt.Message)
                 {
@@ -633,7 +633,7 @@ namespace WinMoreNSnap
 
         private static bool TestMoveKeyModifier()
         {
-            Keys moveKeyModifier = OptionsManager.MoveOptions.keyModifier;
+            Keys moveKeyModifier = Program.Options.MoveOptions.keyModifier;
 
             return (((moveKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
                 && (((moveKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
@@ -660,12 +660,12 @@ namespace WinMoreNSnap
                     break;
             }
 
-            return (OptionsManager.MoveOptions.mouseButton == mouseButton);
+            return (Program.Options.MoveOptions.mouseButton == mouseButton);
         }
 
         private static bool TestResizeKeyModifier()
         {
-            Keys resizeKeyModifier = OptionsManager.ResizeOptions.keyModifier;
+            Keys resizeKeyModifier = Program.Options.ResizeOptions.keyModifier;
 
             return (((resizeKeyModifier & Keys.Alt) == Keys.Alt) == _isAltDown)
                 && (((resizeKeyModifier & Keys.Shift) == Keys.Shift) == _isShiftDown)
@@ -692,7 +692,7 @@ namespace WinMoreNSnap
                     break;
             }
 
-            return (OptionsManager.ResizeOptions.mouseButton == mouseButton);
+            return (Program.Options.ResizeOptions.mouseButton == mouseButton);
         }
 
         private static WindowsQuarter GetQuarterFromPoint(SystemWindow window, Point point)
@@ -778,7 +778,7 @@ namespace WinMoreNSnap
             ///
             ///  Snap/unsnap to top (maximize)
             ///
-            if (point.Y < workRect.Top + OptionsManager.SnapOptions.TopDistance)
+            if (point.Y < workRect.Top + Program.Options.SnapOptions.TopDistance)
             {
                 if (window.WindowState == FormWindowState.Normal)
                 {
@@ -791,15 +791,18 @@ namespace WinMoreNSnap
             }
             else
             {
-                // Unsnap from maximized
+                // Unsnap from maximized and center window on mouse
                 if (window.WindowState == FormWindowState.Maximized)
+                {
                     window.WindowState = FormWindowState.Normal;
+                    window.Location = new Point(point.X - window.Size.Width / 2, point.Y - window.Size.Height / 2);
+                }
             }
 
             ///
             /// Snap/unsnap on left side
             /// 
-            if (point.X < workRect.Left + OptionsManager.SnapOptions.LeftDistance)
+            if (point.X < workRect.Left + Program.Options.SnapOptions.LeftDistance)
             {
                 // Only snap window that are not already snaped
                 if (!_leftSnapedWindows.ContainsKey(window) && !_rightSnapedWindows.ContainsKey(window))
@@ -811,17 +814,16 @@ namespace WinMoreNSnap
                     _leftSnapedWindows.Add(window, window.Position);
 
                     // Snap currentWindow
-                    window.Position = new RECT(workRect.Location.X,
-                                               workRect.Location.Y,
-                                               workRect.Size.Width / 2,
-                                               workRect.Size.Height);
+                    window.Location = workRect.Location;
+                    window.Size = new Size(workRect.Size.Width / 2,
+                                           workRect.Size.Height);
                 }
             }
 
             ///
             /// Snap/unsnap on right side
             /// 
-            else if (point.X > workRect.Right - OptionsManager.SnapOptions.RightDistance)
+            else if (point.X > workRect.Right - Program.Options.SnapOptions.RightDistance)
             {
                 // Only snap window that are not already snaped
                 if (!_rightSnapedWindows.ContainsKey(window) && !_leftSnapedWindows.ContainsKey(window))
@@ -833,10 +835,10 @@ namespace WinMoreNSnap
                     _rightSnapedWindows.Add(window, window.Position);
 
                     // Snap currentWindow
-                    window.Position = new RECT(workRect.Size.Width / 2,
-                                               workRect.Location.Y,
-                                               workRect.Size.Width,
-                                               workRect.Size.Height);
+                    window.Location = new Point(workRect.Location.X + workRect.Size.Width / 2,
+                                                workRect.Location.Y);
+                    window.Size = new Size(workRect.Size.Width / 2,
+                                           workRect.Size.Height);
                 }
             }
 
@@ -844,14 +846,18 @@ namespace WinMoreNSnap
             /// Try to restore from left or right snap zones
             else if (_leftSnapedWindows.ContainsKey(window))
             {
-                // Restore currentWindow position
-                window.Position = _leftSnapedWindows[window];
+                // Restore currentWindow size and center window on mouse
+                window.Size = _leftSnapedWindows[window].Size;
+                window.Location = new Point(point.X - window.Size.Width / 2, point.Y - window.Size.Height / 2);
+
                 _leftSnapedWindows.Remove(window);
             }
             else if (_rightSnapedWindows.ContainsKey(window))
             {
-                // Restore currentWindow position
-                window.Position = _rightSnapedWindows[window];
+                // Restore currentWindow size and center window on mouse
+                window.Size = _rightSnapedWindows[window].Size;
+                window.Location = new Point(point.X - window.Size.Width / 2, point.Y - window.Size.Height / 2);
+
                 _rightSnapedWindows.Remove(window);
             }
         }
@@ -902,8 +908,6 @@ namespace WinMoreNSnap
                                                            g.DrawEllipse(penDG, ellRect);
                                                            ellRect.Inflate(1, 1);
                                                            g.DrawEllipse(penLG, ellRect);
-
-                                                           Thread.Sleep(500);
 
                                                            //g.Clear(Color.Transparent);
 

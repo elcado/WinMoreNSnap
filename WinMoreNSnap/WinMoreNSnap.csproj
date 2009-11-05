@@ -56,19 +56,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutBox.Designer.cs">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Actions.cs" />
     <Compile Include="Hook.cs" />
     <Compile Include="OptionsManager.cs" />
     <Compile Include="SystemCursor.cs" />
-    <Compile Include="TrayApp.cs">
+    <Compile Include="Settings.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TrayApp.Designer.cs">
-      <DependentUpon>TrayApp.cs</DependentUpon>
+    <Compile Include="Settings.Designer.cs">
+      <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="TrayApp.resx">
-      <DependentUpon>TrayApp.cs</DependentUpon>
+    <EmbeddedResource Include="Settings.resx">
+      <DependentUpon>Settings.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -92,14 +99,19 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="icon.ico" />
+    <EmbeddedResource Include="AboutBox.resx">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="icon.ico">
+    </EmbeddedResource>
     <EmbeddedResource Include="icon_off.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="icon_ne.ico" />
-    <Content Include="icon_nw.ico" />
-    <Content Include="icon_se.ico" />
-    <Content Include="icon_sw.ico" />
+    <EmbeddedResource Include="icon_ne.ico" />
+    <EmbeddedResource Include="icon_nw.ico" />
+    <EmbeddedResource Include="icon_se.ico" />
+    <EmbeddedResource Include="icon_sw.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
