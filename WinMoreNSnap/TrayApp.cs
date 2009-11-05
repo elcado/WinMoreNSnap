@@ -39,8 +39,20 @@ namespace WinMoreNSnap
                 _keyboard.Unhook();
         }
 
-        private void GetOptions()
+        private bool GetOptions()
         {
+            ///
+            /// Prevent move or resize without any key modifiers
+            /// 
+            if (!(cbMoveKeyAlt.Checked || cbMoveKeyCtrl.Checked || cbMoveKeyShift.Checked)
+                || !(cbResizeKeyAlt.Checked || cbResizeKeyCtrl.Checked || cbResizeKeyShift.Checked))
+            {
+                MessageBox.Show(this,
+                                "You have to specify at least one key modifier for the move and/or resize functionality",
+                                "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+
             ///
             /// Get move options
             /// 
@@ -88,15 +100,18 @@ namespace WinMoreNSnap
             OptionsManager.SnapOptions.LeftDistance = int.Parse(tbSnapDistLeft.Text);
             OptionsManager.SnapOptions.RightDistance = int.Parse(tbSnapDistRight.Text);
             OptionsManager.SnapOptions.BottomDistance = int.Parse(tbSnapDistBottom.Text);
+
+            return true;
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
             //  Get move options
-            GetOptions();
+            bool result = GetOptions();
 
             // Disable save button
-            buttonSave.Enabled = false;
+            if (result)
+                buttonSave.Enabled = false;
         }
 
         private void quitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -106,8 +121,8 @@ namespace WinMoreNSnap
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.TopMost = true;
             this.Show();
+            this.Activate();
         }
 
         private void TrayApp_FormClosing(object sender, FormClosingEventArgs e)

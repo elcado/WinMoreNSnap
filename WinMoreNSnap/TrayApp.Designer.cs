@@ -95,7 +95,7 @@
             this.toolStripMenuItem1,
             this.quitToolStripMenuItem});
             this.trayMenu.Name = "trayMenu";
-            this.trayMenu.Size = new System.Drawing.Size(153, 98);
+            this.trayMenu.Size = new System.Drawing.Size(142, 76);
             // 
             // activeToolStripMenuItem
             // 
@@ -103,7 +103,7 @@
             this.activeToolStripMenuItem.CheckOnClick = true;
             this.activeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.activeToolStripMenuItem.Name = "activeToolStripMenuItem";
-            this.activeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.activeToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.activeToolStripMenuItem.Text = "Active";
             this.activeToolStripMenuItem.CheckedChanged += new System.EventHandler(this.OnActiveStateChange);
             // 
@@ -111,19 +111,19 @@
             // 
             this.settingsToolStripMenuItem.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold);
             this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.settingsToolStripMenuItem.Text = "Settings...";
             this.settingsToolStripMenuItem.Click += new System.EventHandler(this.settingsToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(138, 6);
             // 
             // quitToolStripMenuItem
             // 
             this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.quitToolStripMenuItem.Size = new System.Drawing.Size(141, 22);
             this.quitToolStripMenuItem.Text = "Quit";
             this.quitToolStripMenuItem.Click += new System.EventHandler(this.quitToolStripMenuItem_Click);
             // 
@@ -524,7 +524,6 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "WinMoreNSnap settings";
-            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.Load += new System.EventHandler(this.TrayApp_Load);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.TrayApp_FormClosed);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.TrayApp_FormClosing);

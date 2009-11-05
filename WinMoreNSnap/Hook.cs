@@ -561,29 +561,24 @@ namespace WinMoreNSnap
                             int dx = mevt.Point.X - _previousPoint.X;
                             int dy = mevt.Point.Y - _previousPoint.Y;
 
-                            // Only move not snaped window
+                            // Only move not left/right snaped window
                             if (!_leftSnapedWindows.ContainsKey(_currentWindow) && !_rightSnapedWindows.ContainsKey(_currentWindow))
                                 MoveWindow(_currentWindow, dx, dy);
 
                             _previousPoint = mevt.Point;
 
-                            // Try to snap
+                            // Snap/Unsnap
                             SnapTo(_currentWindow, mevt.Point);
-
-                            // Prevent event to be forwarded
-                            //e.Handled = true;
                         }
                         else if (_isResizing)
                         {
                             int dx = mevt.Point.X - _previousPoint.X;
                             int dy = mevt.Point.Y - _previousPoint.Y;
 
+                            // Resize current window
                             ResizeWindow(_currentWindow, dx, dy);
 
                             _previousPoint = mevt.Point;
-
-                            // Prevent event to be forwarded
-                            //e.Handled = true;
                         }
                         break;
 
@@ -599,7 +594,6 @@ namespace WinMoreNSnap
 
                                 // Restore cursor
                                 SystemCursor.RestoreSystemCursor();
-                                //SystemCursor.SetSystemCursor(Cursors.Default);
                             }
                             _isMoving = false;
                         }
@@ -612,7 +606,6 @@ namespace WinMoreNSnap
 
                                 // Restore cursor
                                 SystemCursor.RestoreSystemCursor();
-                                //SystemCursor.SetSystemCursor(Cursors.Default);
                             }
                             _isResizing = false;
                         }
@@ -784,7 +777,7 @@ namespace WinMoreNSnap
 
             ///
             ///  Snap/unsnap to top (maximize)
-            /// 
+            ///
             if (point.Y < workRect.Top + OptionsManager.SnapOptions.TopDistance)
             {
                 if (window.WindowState == FormWindowState.Normal)
@@ -798,6 +791,7 @@ namespace WinMoreNSnap
             }
             else
             {
+                // Unsnap from maximized
                 if (window.WindowState == FormWindowState.Maximized)
                     window.WindowState = FormWindowState.Normal;
             }
@@ -885,14 +879,15 @@ namespace WinMoreNSnap
                                                    const int radius = 30;
 
                                                    g.SmoothingMode = SmoothingMode.AntiAlias;
-
-                                                   g.Clip = new Region(new Rectangle(point.X - (radius + 5) / 2, point.Y - (radius + 5) / 2,
-                                                                                     radius + 5, radius + 5));
+                                                   g.CompositingMode = CompositingMode.SourceOver;
+                                                   g.Clip = new Region(new Rectangle(point.X - (radius + 10) / 2, point.Y - (radius + 10) / 2,
+                                                                                     radius + 10, radius + 10));
 
                                                    // Draw a growing circle upon the cursor
-                                                   Pen penLG = new Pen(Color.LightGray, 2);
-                                                   Pen penDG = new Pen(Color.DarkGray, 1);
-                                                   Pen penB = new Pen(Color.Black, 1);
+                                                   Brush trans = Brushes.Transparent;
+                                                   Pen penGr = new Pen(Color.LightGray, 1);
+                                                   Pen penDG = new Pen(Color.DimGray, 1);
+                                                   Pen penLG = new Pen(Color.LightGray, 1);
 
                                                    for (int j = 0; j < 2; j++)
                                                    {
@@ -900,16 +895,22 @@ namespace WinMoreNSnap
                                                        {
                                                            Rectangle ellRect = new Rectangle(point.X - i / 2, point.Y - i / 2, i, i);
 
-                                                           g.DrawEllipse(penDG, ellRect);
+                                                           g.FillEllipse(trans, ellRect);
                                                            ellRect.Inflate(1, 1);
-                                                           g.DrawEllipse(penB, ellRect);
+                                                           g.DrawEllipse(penGr, ellRect);
+                                                           ellRect.Inflate(1, 1);
+                                                           g.DrawEllipse(penDG, ellRect);
                                                            ellRect.Inflate(1, 1);
                                                            g.DrawEllipse(penLG, ellRect);
 
-                                                           Thread.Sleep(2);
-                                                           
+                                                           Thread.Sleep(500);
+
+                                                           //g.Clear(Color.Transparent);
+
                                                            window.Refresh();
                                                        }
+
+                                                       window.Refresh();
                                                    }
                                                }
 
